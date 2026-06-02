@@ -43,6 +43,8 @@ const bookingSchema = new Schema<IBooking>(
 );
 
 
+bookingSchema.index({ email: 1, eventId: 1 }, { unique: true });
+
 // Ensure every booking references a real event and stores a normalized email.
 bookingSchema.pre("save", async function (next) {
   try {
