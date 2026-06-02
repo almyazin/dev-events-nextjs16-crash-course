@@ -50,12 +50,7 @@ bookingSchema.pre("save", async function (next) {
   try {
     const doc = this as IBooking;
 
-    if (doc.isModified("email")) {
-      doc.email = doc.email.trim().toLowerCase();
-      if (!EMAIL_PATTERN.test(doc.email)) {
-        throw new Error("Invalid email format.");
-      }
-    }
+    // Email normalization + format validation is handled by schema (trim/lowercase/validate).
 
     if (doc.isModified("eventId") || doc.isNew) {
       const eventExists = await Event.exists({ _id: doc.eventId });

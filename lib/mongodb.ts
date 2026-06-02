@@ -3,9 +3,7 @@ import mongoose, { type ConnectOptions, type Mongoose } from "mongoose";
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
-if (!MONGODB_URI) {
-  throw new Error("Please define the MONGODB_URI environment variable.");
-}
+// NOTE: Validate MONGODB_URI lazily inside connectDB() to avoid failing at import time.
 
 interface MongooseConnectionCache {
   conn: Mongoose | null;
@@ -38,14 +36,16 @@ export async function connectDB(): Promise<Mongoose> {
   }
 
   if (!cached.promise) {
+    if (!MONGODB_URI) {
+      throw new Error("Please define the MONGODB_URI environment variable.");
+    }
+
     const options: ConnectOptions = {
       bufferCommands: false,
     };
 
     // Store the in-flight promise so parallel requests share one connection attempt.
-    cached.promise = mongoose
-      .connect(MONGODB_URI!, options)
-      .then((mongooseInstance) => mongooseInstance);
+    cached.promise = mongoose.connect(MONGODB_URI, options);
   }
 
   try {
