@@ -1,7 +1,14 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import posthog from "posthog-js";
 
 const Navbar = () => {
+  const handleCreateEventClick = () => {
+    posthog.capture("nav_create_event_clicked");
+  };
+
   return (
     <header>
       <nav>
@@ -14,7 +21,7 @@ const Navbar = () => {
         <ul>
           <Link href='/'>Home</Link>
           <Link href='/events'>Events</Link>
-          <Link href='/about'>Create Event</Link>
+          <Link href='/about' onClick={handleCreateEventClick}>Create Event</Link>
         </ul>
       </nav>
     </header>
