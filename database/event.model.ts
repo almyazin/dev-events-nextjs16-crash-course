@@ -210,7 +210,6 @@ const eventSchema = new Schema<IEvent>(
   },
 );
 
-eventSchema.index({ slug: 1 }, { unique: true });
 
 // Keep URL slug/date/time in a normalized format before persistence.
 eventSchema.pre("save", function (next) {
