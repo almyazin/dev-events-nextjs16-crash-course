@@ -1,5 +1,6 @@
 {
   "editor.formatOnSave": true,
   "prettier.jsxSingleQuote": true,
-  "python.analysis.fixAll": ["source.unusedImports"]
+  "python.analysis.fixAll": ["source.unusedImports"],
+  "js/ts.preferences.quoteStyle": "single"
 }
