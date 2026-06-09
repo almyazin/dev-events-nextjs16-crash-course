@@ -12,11 +12,14 @@ export const createBooking = async ({
 }) => {
   try {
     await connectDB();
-    const booking = (await Booking.create({ eventId, email })).toJSON();
+    const bookingDoc = await Booking.create({ eventId, email });
 
-    return { success: true, booking };
+    return { success: true as const, bookingId: bookingDoc._id.toString() };
   } catch (error) {
     console.error("Error creating booking:", error);
-    return { success: false, error };
+    return {
+      success: false as const,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
   }
 };
