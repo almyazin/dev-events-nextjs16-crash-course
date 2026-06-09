@@ -42,26 +42,31 @@ const bookingSchema = new Schema<IBooking>(
   },
 );
 
-
 bookingSchema.index({ email: 1, eventId: 1 }, { unique: true });
 
 // Ensure every booking references a real event and stores a normalized email.
-bookingSchema.pre("save", async function (next) {
-  try {
-    const doc = this as IBooking;
+bookingSchema.pre("save", async function () {
+  const doc = this as IBooking;
+  if (doc.isModified("eventId") || doc.isNew) {
+    try {
+      // Email normalization + format validation is handled by schema (trim/lowercase/validate).
 
-    // Email normalization + format validation is handled by schema (trim/lowercase/validate).
-
-    if (doc.isModified("eventId") || doc.isNew) {
       const eventExists = await Event.exists({ _id: doc.eventId });
       if (!eventExists) {
-        throw new Error("Referenced event does not exist.");
+        const error = new Error(`Event with ID ${doc.eventId} does not exist.`);
+        error.name = "ValidationError";
+        throw error;
       }
+    } catch (error) {
+      if (error instanceof Error && error.name === "ValidationError") {
+        throw error;
+      }
+      const validationError = new Error(
+        "Invalid event ID format or database error.",
+      );
+      validationError.name = "ValidationError";
+      throw validationError;
     }
-
-    next();
-  } catch (error) {
-    next(error as Error);
   }
 });
 

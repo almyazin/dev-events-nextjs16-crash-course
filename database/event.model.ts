@@ -1,6 +1,6 @@
 import { model, models, Schema, Document, type Model } from "mongoose";
 
-export interface IEvent extends Document {
+export interface IEvent extends Document<string> {
   title: string;
   slug: string;
   description: string;
@@ -165,9 +165,9 @@ const eventSchema = new Schema<IEvent>(
       type: String,
       required: true,
       trim: true,
-      validate: {
-        validator: isNonEmptyString,
-        message: "Mode is required.",
+      enum: {
+        values: ["online", "offline", "hybrid"],
+        message: "Mode must be either online, offline, or hybrid",
       },
     },
     audience: {
@@ -210,31 +210,24 @@ const eventSchema = new Schema<IEvent>(
   },
 );
 
-
 // Keep URL slug/date/time in a normalized format before persistence.
-eventSchema.pre("save", function (next) {
-  try {
-    const doc = this as IEvent;
+eventSchema.pre("save", function () {
+  const doc = this as IEvent;
 
-    if (doc.isModified("title") || !doc.slug) {
-      const generatedSlug = slugify(doc.title);
-      if (!generatedSlug) {
-        throw new Error("Unable to generate slug from title.");
-      }
-      doc.slug = generatedSlug;
+  if (doc.isModified("title") || !doc.slug) {
+    const generatedSlug = slugify(doc.title);
+    if (!generatedSlug) {
+      throw new Error("Unable to generate slug from title.");
     }
+    doc.slug = generatedSlug;
+  }
 
-    if (doc.isModified("date")) {
-      doc.date = normalizeDateToISO(doc.date);
-    }
+  if (doc.isModified("date")) {
+    doc.date = normalizeDateToISO(doc.date);
+  }
 
-    if (doc.isModified("time")) {
-      doc.time = normalizeTime(doc.time);
-    }
-
-    next();
-  } catch (error) {
-    next(error as Error);
+  if (doc.isModified("time")) {
+    doc.time = normalizeTime(doc.time);
   }
 });
 
